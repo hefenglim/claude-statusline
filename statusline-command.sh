@@ -125,12 +125,6 @@ if [[ $input =~ $re ]]; then
   fi
 fi
 
-# Long-context badge. Riding inside the ctx segment rather than standing alone:
-# it annotates the context, and above 200k the billing tier changes, so it is
-# WARN-coloured even while ctx% itself may still be calm.
-ctx_badge=''
-[[ $input == *'"exceeds_200k_tokens":true'* ]] && ctx_badge="${R} ${WARN}>200k"
-
 # ---- real $ cost ----------------------------------------------------------
 # Integer-cents arithmetic with half-up rounding; bash has no floating point.
 cents=0
@@ -202,7 +196,7 @@ DIV=" ${SEP}│${R} "
 line=''
 [[ -n $ver ]] && line="${SECOND}${ver}${R}${DIV}"
 line+="${C_MODEL}${model}${R}${DIV}${C_THINK}${think}${R}"
-line+="${DIV}${ctx_col}${ctx}${ctx_badge}${R}"
+line+="${DIV}${ctx_col}${ctx}${R}"
 line+="${DIV}${cost_col}${cost}${R}"
 [[ -n $lines ]] && line+="${DIV}${SECOND}${lines}${R}"
 

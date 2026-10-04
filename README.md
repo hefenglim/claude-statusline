@@ -10,7 +10,6 @@ v2.1.220 │ Opus 5 │ think:xhigh │ ctx:31% │ $3.41 │ +156/-23 │ 5h:42
 | 模型 | `model.display_name` | 亮白粗體，對比最強 |
 | think | `effort.level`，無此鍵時退回 `thinking.enabled` | 顯示推理效力等級或 on/off |
 | ctx | `context_window.used_percentage` | 目前 context 用量 |
-| `>200k` | `exceeds_200k_tokens` | **僅在 true 時出現**，附在 ctx 之後。超過 200k 會進入長 context 計價級距，故即使 ctx% 仍平靜也標黃 |
 | `$` | `cost.total_cost_usd` | Claude Code 自己算的**實際金額**，與 `/cost` 同源，非依單價估算 |
 | `+A/-R` | `cost.total_lines_added` / `total_lines_removed` | 本 session 改動行數，獨立欄位，**兩者皆為 0 時隱藏** |
 | 5h / 7d | `rate_limits.{five_hour,seven_day}` | 額度用量 +（距離重置倒數） |
@@ -18,13 +17,13 @@ v2.1.220 │ Opus 5 │ think:xhigh │ ctx:31% │ $3.41 │ +156/-23 │ 5h:42
 
 > 目錄放在最後而非開頭：它是麵包屑不是標題，擺行末可讓左邊界固定，切換目錄時各項指標不會左右跳動。
 
-> **寬度提醒**：全部欄位同時出現時 **162 字**（實測，版本 + 長模型名 + `>200k` + 五位數行數 + 兩個額度窗口 + 目錄），窄終端會換行：
+> **寬度提醒**：全部欄位同時出現時約 **138 字**（實測下方範例：版本 + 長模型名 + 五位數行數 + 兩個額度窗口 + 目錄；目錄名越長越寬），窄終端會換行：
 >
 > ```
-> v2.1.220 │ Opus 5 (1M context) │ think:xhigh │ ctx:88%! >200k │ $24.90 │ +9812/-3140 │ 5h:93%! (2h13m) │ 7d:18% (4d6h) │ …/components/statusline
+> v2.1.220 │ Opus 5 (1M context) │ think:xhigh │ ctx:88%! │ $24.90 │ +9812/-3140 │ 5h:93%! (2h13m) │ 7d:18% (4d6h) │ …/components/statusline
 > ```
 >
-> 平時多半短得多（例如剛開 session 沒有改動行數、未超過 200k）。想縮短就從 `render` 段刪掉不需要的 `line+=` 那一行即可 —— 一行一段，互不相依。
+> 平時多半短得多（例如剛開 session 沒有改動行數）。想縮短就從 `render` 段刪掉不需要的 `line+=` 那一行即可 —— 一行一段，互不相依。
 
 ---
 
@@ -149,7 +148,6 @@ SECOND=$'\033[0;37m'    # #CCCCCC   9:1  次要脈絡（目錄、行數）
 | 完全收不到 JSON | 顯示 `Claude │ think:off │ ctx:-- │ $0.00` |
 | `version` 鍵不存在 | 不顯示版本前綴 |
 | `workspace` 鍵不存在 | 整個目錄區段不出現 |
-| `exceeds_200k_tokens` 為 false 或缺席 | 不顯示 `>200k` |
 | 改動行數皆為 0（剛開 session） | 不顯示 `+A/-R` |
 
 **目錄縮寫規則**（末兩層，Windows 與 POSIX 皆適用；`current_dir` 傳來時是 JSON 跳脫的，反斜線會先正規化成斜線）：
@@ -225,7 +223,7 @@ vim:{mode}                 // 僅 vim 模式啟用時
 
 `rate_limits.*.used_percentage` 已是 0–100（Claude Code 內部把 0–1 的 utilisation 乘 100），`resets_at` 是 **unix 秒**。
 
-尚未使用、可自行加入的欄位：`fast_mode`、`output_style.name`、`workspace.project_dir`、`cost.total_duration_ms`、`cost.total_api_duration_ms`、`vim.mode`。
+尚未使用、可自行加入的欄位：`fast_mode`、`output_style.name`、`workspace.project_dir`、`cost.total_duration_ms`、`cost.total_api_duration_ms`、`vim.mode`、`exceeds_200k_tokens`（固定 200k 門檻，與 context 大小及計價皆無關）。
 
 > 取 `version` 時錨定在前面的 `,` 或 `{`（`[,{]"version":"`）。單純比對 `"version":"` 會誤中 `"to_version":"` —— 該鍵目前不在狀態列 payload 中，但存在於 CLI 其他地方，加個錨點成本為零。
 
